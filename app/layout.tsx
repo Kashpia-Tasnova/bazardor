@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import MarketNavigation from "@/components/MarketNavigation";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "বাজার দর",
@@ -21,6 +22,8 @@ export default function RootLayout({
         <MarketNavigation />
 
         {children}
+
+        <Footer />
       </body>
     </html>
   );
