@@ -10,6 +10,10 @@ export default function Home() {
       <div className="mt-7">
         <PriceIncreasedSection />
       </div>
+
+      <div className="mt-7">
+        <PriceDecreasedSection />
+      </div>
     </>
   );
 }
