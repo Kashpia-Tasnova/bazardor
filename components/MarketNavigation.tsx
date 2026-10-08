@@ -2,65 +2,69 @@
 
 import { useEffect, useState } from "react";
 
-const categories = [
-  { icon: "⚪", name: "চাল" },
-  { icon: "🫘", name: "ডাল" },
-  { icon: "🛢️", name: "তেল" },
-  { icon: "🥬", name: "সবজি" },
-  { icon: "🐟", name: "মাছ" },
-  { icon: "🍗", name: "মাংস" },
-  { icon: "🥛", name: "দুধ-মধু" },
-  { icon: "🌶️", name: "মসলা" },
-];
+const API_BASE = "https://api.abcz.workers.dev/api/bazardor";
 
-const marketPrices = [
-  {
-    icon: "⚪",
-    name: "স্বর্ণমতি চাল",
-    price: "১৪৮ টাকা/কেজি",
-    change: "▲ ৫.৬%",
-    type: "up",
-  },
-  {
-    icon: "⚪",
-    name: "মিনিকেট চাল",
-    price: "৯৯ টাকা/কেজি",
-    change: "▼ ২.৯%",
-    type: "down",
-  },
-  {
-    icon: "⚪",
-    name: "বাটাম সাইজ চাল",
-    price: "৬৬ টাকা/কেজি",
-    change: "▲ ০.৫%",
-    type: "up",
-  },
-  {
-    icon: "🫘",
-    name: "মসুর ডাল",
-    price: "৪২৯ টাকা/কেজি",
-    change: "▲ ১.৯%",
-    type: "up",
-  },
-  {
-    icon: "🫘",
-    name: "ছোলা",
-    price: "৪২০ টাকা/কেজি",
-    change: "▼ ২.৮%",
-    type: "down",
-  },
-  {
-    icon: "🫘",
-    name: "আলাস ডাল",
-    price: "২৮০ টাকা/কেজি",
-    change: "▼ ১.২%",
-    type: "down",
-  },
-];
+type Category = {
+  id: string;
+  slug: string;
+  nameBn: string;
+  icon: string;
+};
+
+type Product = {
+  id: number;
+  slug: string;
+  nameBn: string;
+  category: string;
+  categoryNameBn: string;
+  categoryIcon: string;
+  unit: string;
+  image: string;
+  today: number;
+  yesterday: number;
+  lastWeek: number;
+  lastMonth: number;
+  change: {
+    dir: "up" | "down";
+    pct: number;
+  };
+};
 
 export default function MarketNavigation() {
-  const [activeCategory, setActiveCategory] = useState("চাল");
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [marketPrices, setMarketPrices] = useState<Product[]>([]);
+  const [activeCategory, setActiveCategory] = useState("");
   const [isPaused, setIsPaused] = useState(false);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [categoriesResponse, productsResponse] = await Promise.all([
+          fetch(`${API_BASE}/categories`),
+          fetch(`${API_BASE}/products`),
+        ]);
+
+        if (!categoriesResponse.ok || !productsResponse.ok) {
+          throw new Error("Failed to fetch BazarDor data");
+        }
+
+        const categoriesData: Category[] = await categoriesResponse.json();
+        const productsData: Product[] = await productsResponse.json();
+
+        setCategories(categoriesData);
+        setMarketPrices(productsData);
+
+        // Set first category as active
+        if (categoriesData.length > 0) {
+          setActiveCategory(categoriesData[0].id);
+        }
+      } catch (error) {
+        console.error("Error fetching BazarDor data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -91,17 +95,18 @@ export default function MarketNavigation() {
           <div className="flex min-w-max items-center gap-6 py-2.5 sm:gap-8">
             {categories.map((category) => (
               <button
-                key={category.name}
+                key={category.id}
                 type="button"
-                onClick={() => setActiveCategory(category.name)}
+                onClick={() => setActiveCategory(category.id)}
                 className={`flex cursor-pointer items-center gap-1.5 whitespace-nowrap text-[12px] transition-colors sm:text-[13px] ${
-                  activeCategory === category.name
+                  activeCategory === category.id
                     ? "font-semibold text-zinc-900"
                     : "font-medium text-zinc-700 hover:text-green-700"
                 }`}
               >
                 <span className="text-[12px]">{category.icon}</span>
-                <span>{category.name}</span>
+
+                <span>{category.nameBn}</span>
               </button>
             ))}
           </div>
@@ -117,28 +122,31 @@ export default function MarketNavigation() {
         >
           {[...marketPrices, ...marketPrices].map((item, index) => (
             <div
-              key={`${item.name}-${index}`}
+              key={`${item.id}-${index}`}
               className="flex h-[38px] items-center border-r border-zinc-200 px-4 sm:px-5"
             >
               <div className="flex items-center gap-1.5 whitespace-nowrap">
-                <span className="text-[11px]">{item.icon}</span>
+                <span className="text-[11px]">
+                  {item.image || item.categoryIcon}
+                </span>
 
                 <span className="text-[11px] font-medium text-zinc-700 sm:text-[12px]">
-                  {item.name}
+                  {item.nameBn}
                 </span>
 
                 <span className="text-[11px] text-zinc-500 sm:text-[12px]">
-                  {item.price}
+                  {item.today} টাকা/{item.unit}
                 </span>
 
                 <span
                   className={`text-[10px] font-semibold sm:text-[11px] ${
-                    item.type === "up"
+                    item.change.dir === "up"
                       ? "text-red-600"
                       : "text-green-600"
                   }`}
                 >
-                  {item.change}
+                  {item.change.dir === "up" ? "▲" : "▼"}{" "}
+                  {item.change.pct}%
                 </span>
               </div>
             </div>
