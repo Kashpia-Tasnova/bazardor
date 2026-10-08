@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import MarketNavigation from "@/components/MarketNavigation";
 
 export const metadata: Metadata = {
   title: "বাজার দর",
@@ -16,6 +17,8 @@ export default function RootLayout({
     <html lang="bn">
       <body className="bg-white text-zinc-900 antialiased">
         <Navbar />
+
+        <MarketNavigation />
 
         {children}
       </body>
