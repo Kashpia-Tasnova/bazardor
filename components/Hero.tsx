@@ -2,9 +2,9 @@ import Image from "next/image";
 
 export default function Hero() {
   return (
-    <section className="w-full bg-white">
+    <section className="w-full">
       <div className="mx-auto w-full max-w-[1135px] px-4 pt-7 sm:px-6 sm:pt-8 lg:px-0">
-        <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-[#f8fbf8]">
+        <div className="relative overflow-hidden rounded-2xl border border-zinc-200 bg-white">
           <div className="relative flex min-h-[210px] items-center px-5 py-7 sm:min-h-[220px] sm:px-7 md:px-9 lg:min-h-[225px] lg:px-3">
 
             {/* Hero Content */}

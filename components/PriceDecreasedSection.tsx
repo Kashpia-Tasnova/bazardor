@@ -90,10 +90,10 @@ export default async function PriceDecreasedSection() {
           return (
             <div
               key={product.id}
-              className="relative h-[86px] rounded-[11px] border border-zinc-200 bg-[#fcfdfb] px-3.5 py-3"
+              className="relative h-[100px] rounded-[11px] border border-zinc-200 bg-white px-3.5 py-3"
             >
               {/* Product image */}
-              <div className="absolute left-3.5 top-3 flex h-[38px] w-[38px] items-center justify-center rounded-[9px] bg-[#f2f6f1] text-[22px]">
+              <div className="absolute left-3.5 top-3 flex h-[40px] w-[40px] items-center justify-center rounded-[9px] bg-[#f2f6f1] text-[22px]">
                 {product.image || product.categoryIcon}
               </div>
 
@@ -109,7 +109,7 @@ export default async function PriceDecreasedSection() {
               </div>
 
               {/* Price under image */}
-              <div className="absolute left-3.5 top-[57px]">
+              <div className="absolute left-3.5 top-[62px]">
                 <p className="text-[8px] leading-[10px] text-zinc-500">
                   আজকের দাম
                 </p>
