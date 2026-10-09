@@ -3,36 +3,105 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 
 export default function SignupPage() {
+  const router = useRouter();
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
     if (password.length < 8) {
-      setError("পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।");
+      const message = "পাসওয়ার্ড কমপক্ষে ৮ অক্ষরের হতে হবে।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("দুটি পাসওয়ার্ড মিলছে না।");
+      const message = "দুটি পাসওয়ার্ড মিলছে না।";
+      setError(message);
+      toast.error(message);
       return;
     }
 
-    setError("অ্যাকাউন্ট তৈরি করার সুবিধাটি এখনো সংযুক্ত করা হয়নি।");
+    setLoading(true);
+
+    try {
+      const result = await authClient.signUp.email({
+        name: name.trim(),
+        email: email.trim(),
+        password,
+        callbackURL: "/",
+      });
+
+      if (result.error) {
+        const message =
+          result.error.message || "অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।";
+
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। এখন সাইন ইন করুন।");
+
+      router.push("/signin");
+      router.refresh();
+    } catch {
+      const message =
+        "অ্যাকাউন্ট তৈরি করা যায়নি। আপনার ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।";
+
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   }
+
+  async function handleSocialSignup(provider: "google" | "github") {
+    setError("");
+    setSocialLoading(provider);
+
+    try {
+      const result = await authClient.signIn.social({
+        provider,
+        callbackURL: "/",
+      });
+
+      if (result.error) {
+        const message =
+          result.error.message || "সোশ্যাল সাইন আপ করা যায়নি।";
+
+        setError(message);
+        toast.error(message);
+        setSocialLoading("");
+      }
+    } catch {
+      const message = "সোশ্যাল সাইন আপ শুরু করা যায়নি। আবার চেষ্টা করুন।";
+      setError(message);
+      toast.error(message);
+      setSocialLoading("");
+    }
+  }
+
+  const isBusy = loading || socialLoading !== "";
 
   return (
     <main className="min-h-[650px] bg-[#f8fbf8] px-4 py-10 sm:py-12">
       <div className="mx-auto flex w-full max-w-[416px] flex-col items-center">
-        {/* Page heading */}
         <div className="mb-6 text-center">
           <h1 className="text-[25px] font-bold tracking-tight text-[#252c27] sm:text-[27px]">
             অ্যাকাউন্ট তৈরি করুন
@@ -43,7 +112,6 @@ export default function SignupPage() {
           </p>
         </div>
 
-        {/* Signup card */}
         <section className="w-full rounded-2xl border border-[#e0e7e1] bg-white/60 p-5 sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
@@ -63,7 +131,8 @@ export default function SignupPage() {
                 value={name}
                 onChange={(event) => setName(event.target.value)}
                 required
-                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
+                disabled={isBusy}
+                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10 disabled:opacity-60"
               />
             </div>
 
@@ -84,7 +153,8 @@ export default function SignupPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
-                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
+                disabled={isBusy}
+                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10 disabled:opacity-60"
               />
             </div>
 
@@ -106,7 +176,8 @@ export default function SignupPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 minLength={8}
                 required
-                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
+                disabled={isBusy}
+                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10 disabled:opacity-60"
               />
             </div>
 
@@ -125,11 +196,10 @@ export default function SignupPage() {
                 autoComplete="new-password"
                 placeholder="আবার লিখুন"
                 value={confirmPassword}
-                onChange={(event) =>
-                  setConfirmPassword(event.target.value)
-                }
+                onChange={(event) => setConfirmPassword(event.target.value)}
                 required
-                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
+                disabled={isBusy}
+                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10 disabled:opacity-60"
               />
             </div>
 
@@ -144,27 +214,25 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              className="flex h-[42px] w-full items-center justify-center rounded-lg bg-green-700 px-4 text-[13px] font-semibold text-white shadow-[0_2px_4px_rgba(0,0,0,0.16)] transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 focus:ring-offset-2"
+              disabled={isBusy}
+              className="flex h-[42px] w-full items-center justify-center rounded-lg bg-green-700 px-4 text-[13px] font-semibold text-white shadow-[0_2px_4px_rgba(0,0,0,0.16)] transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              অ্যাকাউন্ট তৈরি করুন
+              {loading ? "অ্যাকাউন্ট তৈরি হচ্ছে..." : "অ্যাকাউন্ট তৈরি করুন"}
             </button>
           </form>
 
-          {/* Divider */}
           <div className="my-4 flex items-center gap-4">
             <div className="h-px flex-1 bg-[#dfe5df]" />
             <span className="text-[12px] text-[#6f776f]">অথবা</span>
             <div className="h-px flex-1 bg-[#dfe5df]" />
           </div>
 
-          {/* Social signup buttons */}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() =>
-                setError("Google সাইন আপ এখনো সংযুক্ত করা হয়নি।")
-              }
-              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white"
+              disabled={isBusy}
+              onClick={() => handleSocialSignup("google")}
+              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg
                 viewBox="0 0 48 48"
@@ -188,15 +256,16 @@ export default function SignupPage() {
                   d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.15 1.45-4.9 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"
                 />
               </svg>
-              Google দিয়ে চালিয়ে যান
+              {socialLoading === "google"
+                ? "Google-এ সংযোগ হচ্ছে..."
+                : "Google দিয়ে চালিয়ে যান"}
             </button>
 
             <button
               type="button"
-              onClick={() =>
-                setError("GitHub সাইন আপ এখনো সংযুক্ত করা হয়নি।")
-              }
-              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white"
+              disabled={isBusy}
+              onClick={() => handleSocialSignup("github")}
+              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -205,11 +274,12 @@ export default function SignupPage() {
               >
                 <path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.51-1.3-1.24-1.65-1.24-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 .1.76 2.06 3.04 1.56.1-.72.39-1.21.7-1.49-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.16-3-.12-.29-.5-1.43.11-2.98 0 0 .95-.3 3.05 1.15a10.6 10.6 0 0 1 5.55 0c2.1-1.45 3.05-1.15 3.05-1.15.61 1.55.23 2.69.11 2.98.72.78 1.16 1.78 1.16 3 0 4.29-2.61 5.23-5.1 5.51.4.35.75 1.02.75 2.06v3.05c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z" />
               </svg>
-              GitHub দিয়ে চালিয়ে যান
+              {socialLoading === "github"
+                ? "GitHub-এ সংযোগ হচ্ছে..."
+                : "GitHub দিয়ে চালিয়ে যান"}
             </button>
           </div>
 
-          {/* Sign in link */}
           <p className="mt-4 text-center text-[12px] text-[#424a43]">
             অ্যাকাউন্ট আছে?{" "}
             <Link
@@ -221,7 +291,6 @@ export default function SignupPage() {
           </p>
         </section>
 
-        {/* Back to home */}
         <Link
           href="/"
           className="mt-6 inline-flex items-center gap-1.5 text-[13px] text-[#828a83] transition hover:text-green-700"

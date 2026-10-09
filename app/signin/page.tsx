@@ -3,20 +3,93 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
+import { toast } from "react-hot-toast";
+import { authClient } from "@/lib/auth-client";
 
 export default function SigninPage() {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [socialLoading, setSocialLoading] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
 
-    // Authentication will be connected through Better Auth.
-    setError("সাইন ইন সুবিধাটি এখনো সংযুক্ত করা হয়নি।");
+    if (!email.trim() || !password) {
+      const message = "ইমেইল ও পাসওয়ার্ড লিখুন।";
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await authClient.signIn.email({
+        email: email.trim(),
+        password,
+        callbackURL: "/",
+      });
+
+      if (result.error) {
+        const message =
+          result.error.message ||
+          "সাইন ইন করা যায়নি। ইমেইল ও পাসওয়ার্ড পরীক্ষা করুন।";
+
+        setError(message);
+        toast.error(message);
+        return;
+      }
+
+      toast.success("সফলভাবে সাইন ইন হয়েছে!");
+
+      router.push("/");
+      router.refresh();
+    } catch {
+      const message =
+        "সাইন ইন করা যায়নি। ইন্টারনেট সংযোগ পরীক্ষা করে আবার চেষ্টা করুন।";
+
+      setError(message);
+      toast.error(message);
+    } finally {
+      setLoading(false);
+    }
   }
+
+  async function handleSocialSignin(provider: "google" | "github") {
+    setError("");
+    setSocialLoading(provider);
+
+    try {
+      const result = await authClient.signIn.social({
+        provider,
+        callbackURL: "/",
+      });
+
+      if (result.error) {
+        const message =
+          result.error.message || "সোশ্যাল সাইন ইন করা যায়নি।";
+
+        setError(message);
+        toast.error(message);
+        setSocialLoading("");
+      }
+    } catch {
+      const message = "সাইন ইন শুরু করা যায়নি। আবার চেষ্টা করুন.";
+
+      setError(message);
+      toast.error(message);
+      setSocialLoading("");
+    }
+  }
+
+  const isBusy = loading || socialLoading !== "";
 
   return (
     <main className="min-h-[calc(100vh-200px)] bg-[#f8fbf8] px-4 py-10 sm:py-12">
@@ -53,7 +126,8 @@ export default function SigninPage() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
                 required
-                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
+                disabled={isBusy}
+                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10 disabled:opacity-60"
               />
             </div>
 
@@ -71,15 +145,16 @@ export default function SigninPage() {
                 name="password"
                 type="password"
                 autoComplete="current-password"
-                placeholder="কমপক্ষে ৮ অক্ষর"
+                placeholder="আপনার পাসওয়ার্ড লিখুন"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
                 required
-                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10"
+                disabled={isBusy}
+                className="h-[41px] w-full rounded-lg border border-[#dfe6e0] bg-transparent px-3 text-[13px] text-[#252c27] outline-none transition placeholder:text-[#858c86] focus:border-green-700 focus:ring-2 focus:ring-green-700/10 disabled:opacity-60"
               />
             </div>
 
-            {/* Form message */}
+            {/* Form error */}
             {error && (
               <p
                 role="alert"
@@ -92,9 +167,10 @@ export default function SigninPage() {
             {/* Sign-in button */}
             <button
               type="submit"
-              className="flex h-[42px] w-full items-center justify-center rounded-lg bg-green-700 px-4 text-[13px] font-semibold text-white shadow-[0_2px_4px_rgba(0,0,0,0.16)] transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 focus:ring-offset-2"
+              disabled={isBusy}
+              className="flex h-[42px] w-full items-center justify-center rounded-lg bg-green-700 px-4 text-[13px] font-semibold text-white shadow-[0_2px_4px_rgba(0,0,0,0.16)] transition hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-green-700/30 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              সাইন ইন
+              {loading ? "সাইন ইন হচ্ছে..." : "সাইন ইন"}
             </button>
           </form>
 
@@ -109,12 +185,10 @@ export default function SigninPage() {
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"
-              onClick={() =>
-                setError("Google সাইন ইন এখনো সংযুক্ত করা হয়নি।")
-              }
-              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white"
+              disabled={isBusy}
+              onClick={() => handleSocialSignin("google")}
+              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {/* Google icon */}
               <svg
                 viewBox="0 0 48 48"
                 aria-hidden="true"
@@ -138,17 +212,17 @@ export default function SigninPage() {
                 />
               </svg>
 
-              Google দিয়ে চালিয়ে যান
+              {socialLoading === "google"
+                ? "Google-এ সংযোগ হচ্ছে..."
+                : "Google দিয়ে চালিয়ে যান"}
             </button>
 
             <button
               type="button"
-              onClick={() =>
-                setError("GitHub সাইন ইন এখনো সংযুক্ত করা হয়নি।")
-              }
-              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white"
+              disabled={isBusy}
+              onClick={() => handleSocialSignin("github")}
+              className="flex h-[41px] items-center justify-center gap-2 rounded-lg border border-[#dfe6e0] bg-transparent px-2 text-[12px] font-semibold text-[#303832] transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {/* GitHub icon */}
               <svg
                 viewBox="0 0 24 24"
                 aria-hidden="true"
@@ -157,7 +231,9 @@ export default function SigninPage() {
                 <path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.51-1.3-1.24-1.65-1.24-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 .1.76 2.06 3.04 1.56.1-.72.39-1.21.7-1.49-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.16-3-.12-.29-.5-1.43.11-2.98 0 0 .95-.3 3.05 1.15a10.6 10.6 0 0 1 5.55 0c2.1-1.45 3.05-1.15 3.05-1.15.61 1.55.23 2.69.11 2.98.72.78 1.16 1.78 1.16 3 0 4.29-2.61 5.23-5.1 5.51.4.35.75 1.02.75 2.06v3.05c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z" />
               </svg>
 
-              GitHub দিয়ে চালিয়ে যান
+              {socialLoading === "github"
+                ? "GitHub-এ সংযোগ হচ্ছে..."
+                : "GitHub দিয়ে চালিয়ে যান"}
             </button>
           </div>
 

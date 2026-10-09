@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
-const API_BASE = "https://api.abcz.workers.dev/api/bazardor";
+const API_BASE = "https://api.api-store.workers.dev/api/bazardor";
 
 type Category = {
   id: string;

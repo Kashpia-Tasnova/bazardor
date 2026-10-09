@@ -20,7 +20,7 @@ type Product = {
 };
 
 const API_URL =
-  "https://api.abcz.workers.dev/api/bazardor/products";
+  "https://api.api-store.workers.dev/api/bazardor/products";
 
 function toBanglaNumber(value: number | string) {
   const banglaDigits = "০১২৩৪৫৬৭৮৯";
