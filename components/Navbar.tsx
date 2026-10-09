@@ -1,13 +1,13 @@
+
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Navbar() {
   return (
     <nav className="sticky top-0 z-50 w-full border-b border-zinc-200 bg-white">
       <div className="mx-auto flex min-h-[68px] w-full max-w-[1135px] items-center justify-between px-4 sm:px-6 lg:px-0">
-
         {/* Logo and Website Information */}
-        <div className="flex items-center gap-3">
-          
+        <Link href="/" className="flex items-center gap-3">
           {/* Green Logo Background */}
           <div className="flex h-[40px] w-[40px] items-center justify-center rounded-[9px] bg-green-700">
             <Image
@@ -29,25 +29,24 @@ export default function Navbar() {
               সোমবার, ৬ অক্টোবর, ২০২৬
             </p>
           </div>
-        </div>
+        </Link>
 
         {/* Authentication Buttons */}
         <div className="flex items-center gap-3 sm:gap-5">
-          <button
-            type="button"
+          <Link
+            href="/signin"
             className="text-[13px] font-medium text-zinc-800 transition-colors hover:text-green-700 sm:text-sm"
           >
             সাইন ইন
-          </button>
+          </Link>
 
-          <button
-            type="button"
+          <Link
+            href="/signup"
             className="rounded-lg bg-green-700 px-3.5 py-2 text-[13px] font-medium text-white shadow-sm transition-all hover:bg-green-800 hover:shadow-md sm:px-4 sm:text-sm"
           >
             সাইন আপ
-          </button>
+          </Link>
         </div>
-
       </div>
     </nav>
   );
