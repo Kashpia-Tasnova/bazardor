@@ -34,11 +34,11 @@ export default function Navbar() {
         {/* Authentication Buttons */}
         <div className="flex items-center gap-3 sm:gap-5">
           <Link
-            href="/signin"
-            className="text-[13px] font-medium text-zinc-800 transition-colors hover:text-green-700 sm:text-sm"
-          >
-            সাইন ইন
-          </Link>
+  href="/signin"
+  className="text-[13px] font-medium text-zinc-800 transition-colors hover:text-green-700 sm:text-sm"
+>
+  সাইন ইন
+</Link>
 
           <Link
             href="/signup"
