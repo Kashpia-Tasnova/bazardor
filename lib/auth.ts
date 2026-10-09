@@ -1,3 +1,4 @@
+
 import { setServers } from "node:dns";
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
@@ -20,6 +21,15 @@ export const auth = betterAuth({
 
   emailAndPassword: {
     enabled: true,
+  },
+
+  // Allow users to link Google and GitHub accounts
+  // when they use the same verified email address.
+  account: {
+    accountLinking: {
+      enabled: true,
+      trustedProviders: ["google", "github"],
+    },
   },
 
   socialProviders: {

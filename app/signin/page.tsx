@@ -70,6 +70,13 @@ export default function SigninPage() {
       const result = await authClient.signIn.social({
         provider,
         callbackURL: "/",
+        ...(provider === "github"
+          ? {
+              additionalParams: {
+                prompt: "select_account",
+              },
+            }
+          : {}),
       });
 
       if (result.error) {
@@ -81,7 +88,7 @@ export default function SigninPage() {
         setSocialLoading("");
       }
     } catch {
-      const message = "সাইন ইন শুরু করা যায়নি। আবার চেষ্টা করুন.";
+      const message = "সাইন ইন শুরু করা যায়নি। আবার চেষ্টা করুন।";
 
       setError(message);
       toast.error(message);
@@ -94,7 +101,6 @@ export default function SigninPage() {
   return (
     <main className="min-h-[calc(100vh-200px)] bg-[#f8fbf8] px-4 py-10 sm:py-12">
       <div className="mx-auto flex w-full max-w-[416px] flex-col items-center">
-        {/* Page heading */}
         <div className="mb-6 text-center">
           <h1 className="text-[25px] font-bold tracking-tight text-[#252c27] sm:text-[27px]">
             সাইন ইন
@@ -105,10 +111,8 @@ export default function SigninPage() {
           </p>
         </div>
 
-        {/* Sign-in card */}
         <section className="w-full rounded-2xl border border-[#e0e7e1] bg-white/60 p-5 sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
             <div>
               <label
                 htmlFor="email"
@@ -131,7 +135,6 @@ export default function SigninPage() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label
                 htmlFor="password"
@@ -154,7 +157,6 @@ export default function SigninPage() {
               />
             </div>
 
-            {/* Form error */}
             {error && (
               <p
                 role="alert"
@@ -164,7 +166,6 @@ export default function SigninPage() {
               </p>
             )}
 
-            {/* Sign-in button */}
             <button
               type="submit"
               disabled={isBusy}
@@ -174,14 +175,12 @@ export default function SigninPage() {
             </button>
           </form>
 
-          {/* Divider */}
           <div className="my-4 flex items-center gap-4">
             <div className="h-px flex-1 bg-[#dfe5df]" />
             <span className="text-[12px] text-[#6f776f]">অথবা</span>
             <div className="h-px flex-1 bg-[#dfe5df]" />
           </div>
 
-          {/* Social sign-in buttons */}
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <button
               type="button"
@@ -237,7 +236,6 @@ export default function SigninPage() {
             </button>
           </div>
 
-          {/* Link to signup */}
           <p className="mt-4 text-center text-[12px] text-[#424a43]">
             অ্যাকাউন্ট নেই?{" "}
             <Link
@@ -249,7 +247,6 @@ export default function SigninPage() {
           </p>
         </section>
 
-        {/* Back to home */}
         <Link
           href="/"
           className="mt-6 inline-flex items-center gap-1.5 text-[13px] text-[#828a83] transition hover:text-green-700"

@@ -49,14 +49,15 @@ export default function SignupPage() {
 
       if (result.error) {
         const message =
-          result.error.message || "অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।";
+          result.error.message ||
+          "অ্যাকাউন্ট তৈরি করা যায়নি। আবার চেষ্টা করুন।";
 
         setError(message);
         toast.error(message);
         return;
       }
 
-      toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। এখন সাইন ইন করুন।");
+      toast.success("অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। এখন সাইন ইন করুন.");
 
       router.push("/signin");
       router.refresh();
@@ -79,6 +80,13 @@ export default function SignupPage() {
       const result = await authClient.signIn.social({
         provider,
         callbackURL: "/",
+        ...(provider === "github"
+          ? {
+              additionalParams: {
+                prompt: "select_account",
+              },
+            }
+          : {}),
       });
 
       if (result.error) {
@@ -256,6 +264,7 @@ export default function SignupPage() {
                   d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.15 1.45-4.9 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48Z"
                 />
               </svg>
+
               {socialLoading === "google"
                 ? "Google-এ সংযোগ হচ্ছে..."
                 : "Google দিয়ে চালিয়ে যান"}
@@ -274,6 +283,7 @@ export default function SignupPage() {
               >
                 <path d="M12 .9a11.1 11.1 0 0 0-3.51 21.63c.56.1.76-.24.76-.54v-2.08c-3.1.67-3.76-1.32-3.76-1.32-.51-1.3-1.24-1.65-1.24-1.65-1.02-.7.08-.69.08-.69 1.13.08 1.72 1.16 1.72 1.16 1 .1.76 2.06 3.04 1.56.1-.72.39-1.21.7-1.49-2.48-.28-5.09-1.24-5.09-5.52 0-1.22.44-2.22 1.16-3-.12-.29-.5-1.43.11-2.98 0 0 .95-.3 3.05 1.15a10.6 10.6 0 0 1 5.55 0c2.1-1.45 3.05-1.15 3.05-1.15.61 1.55.23 2.69.11 2.98.72.78 1.16 1.78 1.16 3 0 4.29-2.61 5.23-5.1 5.51.4.35.75 1.02.75 2.06v3.05c0 .3.2.65.77.54A11.1 11.1 0 0 0 12 .9Z" />
               </svg>
+
               {socialLoading === "github"
                 ? "GitHub-এ সংযোগ হচ্ছে..."
                 : "GitHub দিয়ে চালিয়ে যান"}
