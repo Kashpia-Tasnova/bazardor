@@ -137,7 +137,7 @@ export default async function AllProductsSection() {
                     ? `▲ ${toBanglaNumber(formattedChange)}%`
                     : isDown
                       ? `▼ ${toBanglaNumber(formattedChange)}%`
-                      : `—${toBanglaNumber(formattedChange)}%`}
+                      : `— ${toBanglaNumber(formattedChange)}%`}
                 </span>
               </div>
             </Link>

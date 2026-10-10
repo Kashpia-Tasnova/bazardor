@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type Product = {
   id: number;
   slug: string;
@@ -12,7 +14,7 @@ type Product = {
   lastWeek: number;
   lastMonth: number;
   change: {
-    dir: "up" | "down";
+    dir: "up" | "down" | "flat";
     pct: number;
   };
 };
@@ -88,9 +90,10 @@ export default async function PriceDecreasedSection() {
           const decreasePercentage = Math.abs(product.change.pct);
 
           return (
-            <div
+            <Link
               key={product.id}
-              className="relative h-[100px] rounded-[11px] border border-zinc-200 bg-white px-3.5 py-3"
+              href={`/product/${product.slug}`}
+              className="relative block h-[100px] rounded-[11px] border border-zinc-200 bg-white px-3.5 py-3"
             >
               {/* Product image */}
               <div className="absolute left-3.5 top-3 flex h-[40px] w-[40px] items-center justify-center rounded-[9px] bg-[#f2f6f1] text-[22px]">
@@ -123,7 +126,7 @@ export default async function PriceDecreasedSection() {
               <span className="absolute bottom-3 right-3.5 rounded-full bg-[#effaf1] px-2 py-[3px] text-[8px] font-semibold leading-none text-green-600">
                 ▼ {toBanglaNumber(decreasePercentage)}%
               </span>
-            </div>
+            </Link>
           );
         })}
       </div>
