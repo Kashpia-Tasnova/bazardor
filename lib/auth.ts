@@ -23,12 +23,11 @@ export const auth = betterAuth({
     enabled: true,
   },
 
-  // Allow users to link Google and GitHub accounts
-  // when they use the same verified email address.
   account: {
     accountLinking: {
       enabled: true,
       trustedProviders: ["google", "github"],
+      updateUserInfoOnLink: true,
     },
   },
 

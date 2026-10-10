@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,6 +9,8 @@ import { authClient } from "@/lib/auth-client";
 
 const DISPLAY_NAME_STORAGE_PREFIX = "bazardor-display-name:";
 const DISPLAY_NAME_EVENT = "bazardor-display-name-updated";
+
+type SocialProvider = "google" | "github";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -25,6 +28,8 @@ export default function ProfilePage() {
   const [loadingName, setLoadingName] = useState(true);
   const [saving, setSaving] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
+  const [linkingProvider, setLinkingProvider] =
+    useState<SocialProvider | null>(null);
   const [imgError, setImgError] = useState(false);
 
   // Load the custom BazarDor display name for the current user.
@@ -52,6 +57,11 @@ export default function ProfilePage() {
       setLoadingName(false);
     }
   }, [isPending, userId, originalName]);
+
+  // Reset the avatar fallback when the image URL changes.
+  useEffect(() => {
+    setImgError(false);
+  }, [image]);
 
   // Redirect signed-out users to the sign-in page.
   useEffect(() => {
@@ -97,6 +107,30 @@ export default function ProfilePage() {
       toast.error("নাম আপডেট করা যায়নি। আবার চেষ্টা করুন।");
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleLinkSocial(provider: SocialProvider) {
+    if (linkingProvider) return;
+
+    setLinkingProvider(provider);
+
+    try {
+      const result = await authClient.linkSocial({
+        provider,
+        callbackURL: "/profile",
+      });
+
+      if (result.error) {
+        toast.error(
+          result.error.message ||
+            "অ্যাকাউন্ট সংযুক্ত করা যায়নি। আবার চেষ্টা করুন।"
+        );
+        setLinkingProvider(null);
+      }
+    } catch {
+      toast.error("অ্যাকাউন্ট সংযুক্ত করা যায়নি। আবার চেষ্টা করুন।");
+      setLinkingProvider(null);
     }
   }
 
@@ -231,6 +265,8 @@ export default function ProfilePage() {
               {saving ? "আপডেট হচ্ছে..." : "আপডেট"}
             </button>
           </form>
+
+          
         </section>
       </div>
     </main>
