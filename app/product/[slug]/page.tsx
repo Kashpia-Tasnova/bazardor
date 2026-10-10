@@ -30,7 +30,7 @@ type Product = {
   markets: Market[];
 };
 
-const API_URL = "https://api.api-store.workers.dev/api/bazardor";
+const API_URL = "https://openapi.programming-hero.com/api/bazardor";
 
 function toBanglaNumber(value: number | string) {
   return String(value).replace(

@@ -189,7 +189,7 @@ export default function ProfilePage() {
           <div className="flex items-center justify-between gap-4">
             <div className="flex min-w-0 items-center gap-4">
               {image && !imgError ? (
-                // eslint-disable-next-line @next/next/no-img-element
+                
                 <img
                   src={image}
                   alt={`${userName} এর প্রোফাইল`}

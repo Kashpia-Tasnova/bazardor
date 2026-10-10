@@ -47,6 +47,9 @@ The application uses the BazarDor REST API to retrieve product and category data
 **Alternative API:**
 `https://api.abcz.workers.dev/api/bazardor`
 
+**New API:**
+`https://openapi.programming-hero.com/api/bazardor`
+
 ### Available Endpoints
 
 | Endpoint | Description |

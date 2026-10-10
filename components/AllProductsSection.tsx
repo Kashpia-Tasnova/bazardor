@@ -3,7 +3,7 @@ import AllProductsClient, {
   type Product,
 } from "./AllProductsClient";
 
-const BASE_URL = "https://api.api-store.workers.dev/api/bazardor";
+const BASE_URL = "https://openapi.programming-hero.com/api/bazardor";
 
 async function getProducts(): Promise<Product[]> {
   const response = await fetch(`${BASE_URL}/products`, {

@@ -257,7 +257,7 @@ export default function Navbar() {
                           <LogOut size={17} />
                         )}
 
-                        {loggingOut ? "লগ আউট হচ্ছে..." : "লগ আউট"}
+                        {loggingOut ? "সাইন আউট  হচ্ছে..." : "সাইন আউট "}
                       </button>
                     </div>
                   </div>
