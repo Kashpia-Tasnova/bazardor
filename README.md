@@ -16,10 +16,7 @@ BazarDor is a responsive web application that helps users explore essential prod
 - **🔐 Authentication:** Register and sign in using email and password, Google, or GitHub with Better Auth.
 - **👤 Profile Management:** View profile information and update the user's name.
 - **🔔 Toast Notifications:** Receive feedback for authentication, validation errors, and sign-out actions.
-- **⏳ Loading Skeletons:** Display loading placeholders while product data is being fetched.
 - **🚦 Custom 404 Pages:** Show friendly error pages for invalid routes and unavailable products or categories.
-- **🔄 Dynamic Routing:** Use Next.js App Router for product and category pages.
-- **📈 Price Ticker:** Display a continuously scrolling strip of product prices and percentage changes.
 - **🦶 Informative Footer:** Include a project description and a notice explaining that prices may change with market conditions.
 
 ## 🛠️ Technologies Used
